@@ -12,12 +12,13 @@ from histogram import build_histogram, build_simple_fixed_bins_histogram
 from iof import IOF
 from lin import Lin
 import numpy as np
+from overlap import Overlap
 import pandas as pd
 
 
 def experiment(datasets):
     
-    meta_X, meta_Y, Z = build_metadataset(datasets) # Z contains the best ARI achieved for each meta-instance
+    meta_X, meta_Y, Z, A = build_metadataset(datasets) # Z contains the best ARI achieved for each meta-instance
     eval_metrics = build_and_test_model("RF", meta_X, meta_Y, Z, 10)
     print(eval_metrics)
 
@@ -31,29 +32,22 @@ def build_metadataset(datasets):
         
         matrices.append(Eskin(X).diss_matrix())
         
-        lin = Lin(X)
-        matrices.append(lin.diss_matrix(f="lin"))
-        matrices.append(lin.diss_matrix(f="lin1"))
-         
-        iof = IOF(X)
-        matrices.append(iof.diss_matrix(f="of"))
-        matrices.append(iof.diss_matrix(f="iof"))
-         
-        goodall = Goodall(X)
-        matrices.append(goodall.diss_matrix(f="goodall1"))
-        matrices.append(goodall.diss_matrix(f="goodall2"))
-        matrices.append(goodall.diss_matrix(f="goodall3"))
-        matrices.append(goodall.diss_matrix(f="goodall4"))
+        matrices.append(Overlap(X).diss_matrix())
         
-        # 0 eskin
-        # 1 lin
-        # 2 lin1
-        # 3 of
-        # 4 iof
-        # 5 goodall1
-        # 6 goodall2
-        # 7 goodall3
-        # 8 goodall4
+        lin = Lin(X)
+        matrices.append(lin.diss_matrix_lin())
+        matrices.append(lin.diss_matrix_lin1())
+          
+        iof = IOF(X)
+        matrices.append(iof.diss_matrix_of())
+        matrices.append(iof.diss_matrix_iof())
+          
+        goodall = Goodall(X)
+        matrices.append(goodall.diss_matrix_g1())
+        matrices.append(goodall.diss_matrix_g2())
+        matrices.append(goodall.diss_matrix_g3())
+        matrices.append(goodall.diss_matrix_g4())
+        
         
         best_ari = None
         best_ari_index = None
@@ -74,7 +68,7 @@ def build_metadataset(datasets):
     
     print(meta_dataset)
     
-    return np.array([x for x,_,_ in meta_dataset]), np.array([y for _,y,_ in meta_dataset]), np.array([z for _,_,z in meta_dataset])
+    return np.array([x for x,_,_,_ in meta_dataset]), np.array([y for _,y,_,_ in meta_dataset]), np.array([z for _,_,z,_ in meta_dataset]), np.array([a for _,_,_,a in meta_dataset])
 
 def comp_meta_features(dataset):
     

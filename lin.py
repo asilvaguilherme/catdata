@@ -20,7 +20,7 @@ class Lin():
         self.f = stats.freq(X.values)
         self.cache = np.array([dict() for _ in range(self.n_attrib)])
 
-    def diss_matrix(self, f="lin"):
+    def diss_matrix_lin(self):
          
         matrix = np.zeros(shape=(self.n,self.n))
         
@@ -29,8 +29,29 @@ class Lin():
         for i in range(self.n):
             pivot_vector = self.X[i,:]
             
-            args = [(pivot_vector, self.X[j,:], self.f, f) for j in range(i,self.n)]
-            res = np.array(pool.starmap(self.iof,args))
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.lin,args))
+                
+            matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
+            
+                  
+        for i in range(self.n):
+            for j in range(i):
+                matrix[i,j] = matrix[j,i]
+        
+        return matrix
+    
+    def diss_matrix_lin1(self):
+         
+        matrix = np.zeros(shape=(self.n,self.n))
+        
+        pool = mp.Pool(processes=mp.cpu_count())
+        
+        for i in range(self.n):
+            pivot_vector = self.X[i,:]
+            
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.lin1,args))
                 
             matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
             
@@ -42,19 +63,19 @@ class Lin():
         return matrix
     
     
-    def iof(self,X,Y,prob,f):
+    def lin(self,X,Y,prob):
         
         acm = np.sum(np.array([math.log(prob[i][X[i]]) for i in range(self.n_attrib)]))
         acm += np.sum(np.array([math.log(prob[i][Y[i]]) for i in range(self.n_attrib)]))
 
-        if f == "lin":
-            return 1 - ( np.sum(np.array([self.attib_lin(i, X[i], Y[i], prob) for i in range(self.n_attrib)]) / acm ))
-        elif f == "lin1":
-            return 1 - ( np.sum(np.array([self.attib_lin1(i, X[i], Y[i], prob) for i in range(self.n_attrib)]) / acm )) 
+        return ( 1 / ( np.sum(np.array([self.attib_lin(i, X[i], Y[i], prob) for i in range(self.n_attrib)]) / acm )) ) - 1
         
-        # Conversion according to page (from similarity to dissimilarity)
-        # Sulc, Z., & Rezankovas, H. (2019). Comparison iof Similarity Measures for Categorical Data in Hierarchical Clustering. 
-        # Journal iof Classification, 36(1), 58-72.
+    def lin1(self,X,Y,prob):
+        
+        acm = np.sum(np.array([math.log(prob[i][X[i]]) for i in range(self.n_attrib)]))
+        acm += np.sum(np.array([math.log(prob[i][Y[i]]) for i in range(self.n_attrib)]))
+
+        return ( 1 / ( np.sum(np.array([self.attib_lin1(i, X[i], Y[i], prob) for i in range(self.n_attrib)]) / acm )) ) - 1
     
     def attib_lin(self,k,X_k,Y_k,freq):
         

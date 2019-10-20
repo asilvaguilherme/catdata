@@ -18,7 +18,7 @@ class Goodall():
         self.cache = np.array([dict() for _ in range(self.n_attrib)])
         self.f = stats.p2(X.values)
 
-    def diss_matrix(self, f="goodall1"):
+    def diss_matrix_g1(self):
          
         matrix = np.zeros(shape=(self.n,self.n))
         
@@ -27,8 +27,71 @@ class Goodall():
         for i in range(self.n):
             pivot_vector = self.X[i,:]
             
-            args = [(pivot_vector, self.X[j,:], self.f, f) for j in range(i,self.n)]
-            res = np.array(pool.starmap(self.goodall,args))
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.goodall1,args))
+                
+            matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
+            
+                  
+        for i in range(self.n):
+            for j in range(i):
+                matrix[i,j] = matrix[j,i]
+        
+        return matrix
+    
+    def diss_matrix_g2(self):
+         
+        matrix = np.zeros(shape=(self.n,self.n))
+        
+        pool = mp.Pool(processes=mp.cpu_count())
+        
+        for i in range(self.n):
+            pivot_vector = self.X[i,:]
+            
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.goodall2,args))
+                
+            matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
+            
+                  
+        for i in range(self.n):
+            for j in range(i):
+                matrix[i,j] = matrix[j,i]
+        
+        return matrix
+    
+    def diss_matrix_g3(self):
+         
+        matrix = np.zeros(shape=(self.n,self.n))
+        
+        pool = mp.Pool(processes=mp.cpu_count())
+        
+        for i in range(self.n):
+            pivot_vector = self.X[i,:]
+            
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.goodall3,args))
+                
+            matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
+            
+                  
+        for i in range(self.n):
+            for j in range(i):
+                matrix[i,j] = matrix[j,i]
+        
+        return matrix
+    
+    def diss_matrix_g4(self):
+         
+        matrix = np.zeros(shape=(self.n,self.n))
+        
+        pool = mp.Pool(processes=mp.cpu_count())
+        
+        for i in range(self.n):
+            pivot_vector = self.X[i,:]
+            
+            args = [(pivot_vector, self.X[j,:], self.f) for j in range(i,self.n)]
+            res = np.array(pool.starmap(self.goodall4,args))
                 
             matrix[i] = np.concatenate((np.zeros(shape=(i)),res))
             
@@ -40,21 +103,18 @@ class Goodall():
         return matrix
     
     
-    def goodall(self,X,Y,freq,f):
+    def goodall1(self,X,Y,freq):
+        return 1 - ( np.sum(np.array([self.attib_goodall1(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib ))
+    
+    def goodall2(self,X,Y,freq):
+        return 1 - ( np.sum(np.array([self.attib_goodall2(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib )) 
+    
+    def goodall3(self,X,Y,freq):
+        return 1 - ( np.sum(np.array([self.attib_goodall3(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib ))
+    
+    def goodall4(self,X,Y,freq):
+        return 1 - ( np.sum(np.array([self.attib_goodall4(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib )) 
         
-        if f == "goodall1":
-            return 1 - ( np.sum(np.array([self.attib_goodall1(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib ))
-        elif f == "goodall2":
-            return 1 - ( np.sum(np.array([self.attib_goodall2(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib )) 
-        elif f == "goodall3":
-            return 1 - ( np.sum(np.array([self.attib_goodall3(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib ))
-        elif f == "goodall4":
-            return 1 - ( np.sum(np.array([self.attib_goodall4(i, X[i], Y[i], freq) for i in range(self.n_attrib)]) / self.n_attrib )) 
-        
-        # from similarity to dissimilarity
-        # Conversion according to page 
-        # Sulc, Z., & Rezankovas, H. (2019). Comparison of Similarity Measures for Categorical Data in Hierarchical Clustering. 
-        # Journal of Classification, 36(1), 58-72.
     
     def attib_goodall1(self,k,X_k,Y_k,freq):
         

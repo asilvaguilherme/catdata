@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 
 
+from os import listdir
+from os.path import isfile, join
+
 # from kmodes.kmodes import KModes
 # data = np.random.choice(20, (100, 10)) # random categorical data
 # km = KModes(n_clusters=4, init='Huang', n_init=5, verbose=1)
@@ -26,7 +29,7 @@ path = "C:\\Users\\galvesda\\Desktop\\categorical datasets\\" # 1:4
 sep = ","
 n_clusters = 3
 
-def run():
+def run_test():
     
     datasets = []
     
@@ -80,5 +83,62 @@ def load_from_file(path,separator):
     
     return instances
 
+def to_categorical_values(array,n_bins):
+    
+    _, limits = np.histogram(array, bins=n_bins)
+    categorical_data = [None]*len(array)
+    
+    for j in range(len(array)):
+        value = array[j]
+        for i in range(1,len(limits)):
+            limit = limits[i]
+            if value < limit:
+                categorical_data[j] = i
+                break 
+        categorical_data[j] = i
+    
+    return categorical_data
+
+def convert_categorical(X):
+    
+    schemes = [[2,3,4], [2,3,5,6], [6,8,10]]
+    choosen_scheme = random.choice(schemes)
+    
+    new_X = []
+    
+    for i in range(len(X[0])):
+        att_choice = random.choice(choosen_scheme)
+        new_X.append(to_categorical_values(X[:,i].astype(np.float),att_choice))
+    
+    return np.array(new_X).T
+    
+
+def join_files(mypath):
+    datasets = set()
+    for f in listdir(mypath):
+        if isfile(join(mypath, f)):
+            root_filename = f.replace('.dat','').replace('.mem','')
+            if root_filename != 'script':
+                datasets.add(root_filename)
+    
+    
+    dataframes = []            
+    for f in datasets:
+        numerical_X = np.array(load_from_file(join(mypath, f+'.dat'),' '))
+        cat_X = convert_categorical(numerical_X[1:,:])
+        
+        Y = np.array(load_from_file(join(mypath, f+'.mem'),' '))
+        
+#         df = pd.DataFrame(data=np.concatenate((cat_X, Y), axis=1),columns=np.concatenate((numerical_X[0], ["class"]))) 
+        df_X = pd.DataFrame(data=cat_X, columns=numerical_X[0])
+        df_Y = pd.DataFrame(data=Y, columns=["class"])
+        
+        dataframes.append((df_X,df_Y,4)) # X and Y
+    
+    meta.experiment(dataframes)
+    
+    return dataframes
+
 if __name__ == '__main__':
-    run()
+    join_files("C:\\Users\\galvesda\\Documents\\datasets_TESTE\\")
+#     run_test()
