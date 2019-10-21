@@ -1,3 +1,6 @@
+from os import listdir
+from os.path import isfile, join
+import pickle
 import random
 import sys
 
@@ -9,9 +12,6 @@ import meta
 import numpy as np
 import pandas as pd
 
-
-from os import listdir
-from os.path import isfile, join
 
 # from kmodes.kmodes import KModes
 # data = np.random.choice(20, (100, 10)) # random categorical data
@@ -140,5 +140,14 @@ def join_files(mypath):
     return dataframes
 
 if __name__ == '__main__':
-    join_files("C:\\Users\\galvesda\\Documents\\datasets_TESTE\\")
+#     join_files("C:\\Users\\galvesda\\Documents\\datasets_small2\\")
 #     run_test()
+    
+    infile = open("metadaset-small2_copy",'rb')
+    list = pickle.load(infile)
+    infile.close()
+    
+    meta_X, meta_Y, Z = list[0], list[1], list[2]
+    
+    eval_metrics = meta.build_and_test_model("RANDOM", meta_X, meta_Y, Z, 10)
+    print(eval_metrics)

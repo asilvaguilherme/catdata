@@ -1,3 +1,6 @@
+import pickle
+import random
+
 import scipy
 from sklearn import svm, metrics, preprocessing
 from sklearn.cluster.hierarchical import AgglomerativeClustering
@@ -19,15 +22,21 @@ import pandas as pd
 def experiment(datasets):
     
     meta_X, meta_Y, Z, A = build_metadataset(datasets) # Z contains the best ARI achieved for each meta-instance
-    eval_metrics = build_and_test_model("RF", meta_X, meta_Y, Z, 10)
-    print(eval_metrics)
+    
+    outfile = open("metadaset-small2",'wb')
+    pickle.dump([meta_X, meta_Y, Z, A],outfile)
+    outfile.close()
+    
+    return 0
+
 
 def build_metadataset(datasets):
     
     meta_dataset = []
+    total = len(datasets)
     
     for X, Y, n_clusters in datasets:
-        
+        print("remaining",total)
         matrices = []
         
         matrices.append(Eskin(X).diss_matrix())
@@ -65,6 +74,8 @@ def build_metadataset(datasets):
         meta_fetaures = comp_meta_features(X)
         
         meta_dataset.append((meta_fetaures, best_ari_index, best_ari, all_ari))
+        
+        total -= 1
     
     print(meta_dataset)
     
@@ -139,7 +150,11 @@ def build_and_test_model(classifier, X, Y, Z, param):
         elif classifier == "NAIVE":
             clf = GaussianNB()
             clf.fit(X_train, Y_train) 
-            predicted = clf.predict(X_test).astype(int)    
+            predicted = clf.predict(X_test).astype(int) 
+        
+        elif classifier == "RANDOM":
+            options = list(set(Y_train))
+            predicted = [random.choice(options) for _ in range(len(Y_test))]
             
         accuracies.append(metrics.accuracy_score(Y_test, predicted))
         ari.append(metrics.adjusted_rand_score(Z_test, predicted))

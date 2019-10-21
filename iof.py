@@ -24,7 +24,7 @@ class IOF():
          
         matrix = np.zeros(shape=(self.n,self.n))
         
-        pool = mp.Pool(processes=mp.cpu_count())
+        pool = mp.Pool(processes=mp.cpu_count()-1)
         
         for i in range(self.n):
             pivot_vector = self.X[i,:]
@@ -45,7 +45,7 @@ class IOF():
          
         matrix = np.zeros(shape=(self.n,self.n))
         
-        pool = mp.Pool(processes=mp.cpu_count())
+        pool = mp.Pool(processes=mp.cpu_count()-1)
         
         for i in range(self.n):
             pivot_vector = self.X[i,:]
@@ -74,13 +74,13 @@ class IOF():
     def attib_of(self,k,X_k,Y_k,freq):
         
         if X_k != Y_k:
-            return 1 / ( math.log(self.n/freq[k][X_k]) + math.log(self.n/freq[k][Y_k]) )
+            return 1 / ( 1 + math.log(self.n/freq[k][X_k]) * math.log(self.n/freq[k][Y_k]) )
         else:
             return 1
     
     def attib_iof(self,k,X_k,Y_k,freq):
         
         if X_k != Y_k:
-            return 1 / ( math.log(freq[k][X_k]) + math.log(freq[k][Y_k]) )
+            return 1 / (1 + math.log(freq[k][X_k]) * math.log(freq[k][Y_k]) )
         else:
             return 1

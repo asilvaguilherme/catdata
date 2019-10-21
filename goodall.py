@@ -64,7 +64,7 @@ class Goodall():
          
         matrix = np.zeros(shape=(self.n,self.n))
         
-        pool = mp.Pool(processes=mp.cpu_count())
+        pool = mp.Pool(processes=mp.cpu_count()-1)
         
         for i in range(self.n):
             pivot_vector = self.X[i,:]
@@ -85,7 +85,7 @@ class Goodall():
          
         matrix = np.zeros(shape=(self.n,self.n))
         
-        pool = mp.Pool(processes=mp.cpu_count())
+        pool = mp.Pool(processes=mp.cpu_count()-1)
         
         for i in range(self.n):
             pivot_vector = self.X[i,:]
